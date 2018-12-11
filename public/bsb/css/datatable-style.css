@@ -1,0 +1,13 @@
+﻿
+
+.bootstrap-select {
+  width: auto \0 !important;
+} 
+
+.bootstrap-select:not([class*="col-"]):not([class*="form-control"]):not(.input-group-btn) {
+  width: auto !important;
+} 
+
+.bootstrap-select.btn-group .dropdown-toggle .caret {
+  right: 0;
+}
