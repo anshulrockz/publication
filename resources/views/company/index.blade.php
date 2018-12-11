@@ -4,6 +4,9 @@
 
 <!-- Bootstrap Select Css -->
 <link href="{{ asset('bsb/plugins/bootstrap-select/css/bootstrap-select.css')}}" rel="stylesheet" />
+
+<!-- Bootstrap Datatables Css -->
+<link href="{{ asset('bsb/css/datatable-style.css')}}" rel="stylesheet" /> 
 <link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet"/>
 <link href="https://cdn.datatables.net/fixedheader/3.1.3/css/fixedHeader.dataTables.min.css" rel="stylesheet"/>
 
@@ -42,7 +45,7 @@
             </div>
             <div class="body">
                 <div class="table-responsive">
-                    <table class="table table-bordered table-striped table-hover js-basic-example dataTable">
+                    <table class="table table-bordered table-striped table-hover dataTable">
                         <thead>
                             <tr>
                                 <th>State</th>
@@ -54,11 +57,18 @@
                                 <th>Action</th>
                             </tr>
                         </thead>
+                        <tfoot style="display: table-header-group;">
+                            <tr>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
                         <tbody>
                         	@foreach( $company as $key=>$list)
                             <tr>
-                                <td>{{$list->state_id}}</td>
-                                <td>{{$list->city_id}}</td>
+                                <td>{{getFromID($list->state_id, 'states')}}</td>
+                                <td>{{getFromID($list->city_id, 'cities')}}</td>
                                 <td>{{$list->name}}</td>
                                 <td>{{$list->contact_person}}</td>
                                 <td>{{$list->mobile}}</td>
@@ -84,11 +94,19 @@
 <!-- Jquery DataTable Plugin Js -->
 <script src="{{ asset('bsb/plugins/jquery-datatable/jquery.dataTables.js') }}"></script>
 <script src="https://cdn.datatables.net/fixedheader/3.1.3/js/dataTables.fixedHeader.min.js"></script>
+<script src="{{ asset('bsb/plugins/jquery-datatable/skin/bootstrap/js/dataTables.bootstrap.js') }}"></script>
+<script src="{{ asset('bsb/plugins/jquery-datatable/extensions/export/dataTables.buttons.min.js') }}"></script>
+<script src="{{ asset('bsb/plugins/jquery-datatable/extensions/export/buttons.flash.min.js') }}"></script>
+<script src="{{ asset('bsb/plugins/jquery-datatable/extensions/export/jszip.min.js') }}"></script>
+<script src="{{ asset('bsb/plugins/jquery-datatable/extensions/export/pdfmake.min.js') }}"></script>
+<script src="{{ asset('bsb/plugins/jquery-datatable/extensions/export/vfs_fonts.js') }}"></script>
+<script src="{{ asset('bsb/plugins/jquery-datatable/extensions/export/buttons.html5.min.js') }}"></script>
+<script src="{{ asset('bsb/plugins/jquery-datatable/extensions/export/buttons.print.min.js') }}"></script>
 
 <!-- Select Plugin Js -->
     <script src="{{ asset('bsb/plugins/bootstrap-select/js/bootstrap-select.js')}}"></script>
 
-<script>
+<!-- <script>
 $(document).ready(function() {
     $('.dataTable').DataTable( {
         "order": [[ 1, "desc" ]],
@@ -98,6 +116,88 @@ $(document).ready(function() {
         }
     } );
 } );
+</script> -->
+
+<script>
+
+var normalizeDate = function(dateString) {
+  var date = new Date(dateString);
+  var normalized = date.getFullYear() + '' + (("0" + (date.getMonth() + 1)).slice(-2)) + '' + ("0" + date.getDate()).slice(-2);
+  return normalized;
+}
+
+$.fn.dataTable.ext.search.push(
+    function( settings, data, dataIndex ) {
+        var start = normalizeDate( $('#start').val() );
+        var end = normalizeDate( $('#end').val() );
+        var colDate = normalizeDate( data[0] ) || 0;
+ 
+        if ( ( isNaN( start ) && isNaN( end ) ) ||
+             ( isNaN( start ) && colDate <= end ) ||
+             ( start <= colDate && isNaN( end ) ) ||
+             ( start <= colDate && colDate <= end )
+        ) 
+        {
+            return true;
+        }
+        
+        return false;
+    }
+);
+ 
+$(document).ready(function() {
+    document.title = 'Clients'; //$("#header").html();
+    var table = $('.dataTable').DataTable({
+        dom: 'Bfrtip',
+        responsive: true,
+        buttons: [
+             {
+                        extend: 'print',
+                        exportOptions: {
+                    columns: [ 1, 2, 3, 4, 5, 6, 7 ]
+                }
+                    },
+                    {
+                        extend: 'excel',
+                        exportOptions: {
+                    columns: [ 1, 2, 3, 4, 5, 6, 7 ]
+                }
+                    }
+        ],
+        "order": [[ 1, "asc" ]],
+        // fixedHeader: {
+        //     header: true,
+        //     headerOffset: $('#navbar-collapse').height()
+        // },
+        initComplete: function () {
+            this.api().columns().every( function () {
+                var column = this;
+                var select = $('<select><option value=""></option></select>')
+                    .appendTo( $(column.footer()).empty() )
+                    .on( 'change', function () {
+                        var val = $.fn.dataTable.util.escapeRegex(
+                            $(this).val()
+                        );
+ 
+                        column
+                            .search( val ? '^'+val+'$' : '', true, false )
+                            .draw();
+                    } );
+ 
+                column.data().unique().sort().each( function ( d, j ) {
+                    select.append( '<option value="'+d+'">'+d+'</option>' )
+                } );
+            } );
+        }
+    });
+     
+    //table.column( 0 ).visible( false );
+    
+    $('#start, #end').change( function() {
+        table.draw();
+    } );
+} );
+
 </script>
 
 @endsection

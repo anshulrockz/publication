@@ -7,8 +7,9 @@
 
 <!-- Bootstrap Select Css -->
 <link href="{{ asset('bsb/plugins/bootstrap-select/css/bootstrap-select.css')}}" rel="stylesheet" />
-<link href="{{ asset('bsb/css/datatable-style.css')}}" rel="stylesheet" /> 
 
+<!-- Bootstrap Datatables Css -->
+<link href="{{ asset('bsb/css/datatable-style.css')}}" rel="stylesheet" /> 
 <link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet"/>
 <link href="https://cdn.datatables.net/fixedheader/3.1.3/css/fixedHeader.dataTables.min.css" rel="stylesheet"/>
 
