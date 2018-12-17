@@ -2,27 +2,9 @@
 
 @section('content')
 
-<script>
-$( document ).ready(function() {
-    $("#form input").prop("disabled", true);
-    $("#form select").prop("disabled", true);
-    $("#form textarea").prop("disabled", true);
-    $("#form-save").prop("disabled", true);
-});
+<!-- Bootstrap Select Css -->
+<link href="{{ asset('bsb/plugins/bootstrap-select/css/bootstrap-select.css')}}" rel="stylesheet" />
 
-$(function() {
-    $("#form-edit").click(function() {
-     	$("#form input").prop("disabled", false);
-     	$("#form select").prop("disabled", false);
-    	$("#form textarea").prop("disabled", false);
-    	$("#form-save").prop("disabled", false);
-    });
-});
-</script>
-
-<!-- JQuery DataTable Css -->
-<link href="{{ asset('bsb/plugins/jquery-datatable/skin/bootstrap/css/dataTables.bootstrap.css') }}" rel="stylesheet"/>
-    
 <div class="row clearfix">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <div class="card">
@@ -125,7 +107,7 @@ $(function() {
                                 <select class="form-control show-tick" id="state_id" name="state_id" data-live-search="true" required>
                                     <option value="">Please Select...</option>
                                     @foreach($states as $list)
-                                    <option value="{{$list->id}}">{{$list->name}}</option>
+                                    <option value="{{$list->id}}" @if($company->state_id == $list->id) selected @endif>{{$list->name}}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -134,7 +116,7 @@ $(function() {
                             <label for="city_id">City</label>
                             <div class="form-group">
                                 <select class="form-control show-tick" id="city_id" name="city_id" data-live-search="true" required>
-                                    <option value="">Please Select...</option>
+                                    <option value="{{ $company->city_id }}">{{getFromID($company->city_id, 'cities')}}</option>
                                 </select>
                             </div>
                         </div>
@@ -158,4 +140,61 @@ $(function() {
         </div>
     </div>
 </div>
+
+
+<!-- Select Plugin Js -->
+<script src="{{ asset('bsb/plugins/bootstrap-select/js/bootstrap-select.js')}}"></script>
+
+<script>
+$( document ).ready(function() {
+    $("#form input").prop("disabled", true);
+    $("#form select").prop("disabled", true);
+    $("#form textarea").prop("disabled", true);
+    $("#form-save").prop("disabled", true);
+});
+
+$("#form-edit").click(function() {
+    $("#form input").prop("disabled", false);
+    $("#form select").prop("disabled", false);
+    $("#form textarea").prop("disabled", false);
+    $("#form-save").prop("disabled", false);
+    $('select').selectpicker('refresh');
+});
+</script>
+
+<script>
+
+$("#state_id").change(function(){ 
+    var id = $(this).val();
+
+    if(id != ''){
+        $('#city_id option').remove();
+        $.ajax({
+            type: "GET",
+            url: "{{url('cities')}}",
+            data:'id='+id,
+            success: function(data){
+                var data = JSON.parse(data);
+                var selOpts = "<option>select</option>";
+                if(data.length >0){					
+                    // console.log(data); 
+                    for (i=0;i<data.length;i++)
+                    {
+                        var id = data[i].id; 
+                        var val = data[i].name;
+                        selOpts += "<option value='"+id+"'>"+val+"</option>";
+                    }
+                    $('#city_id').append(selOpts);
+                    $('#city_id').selectpicker('refresh');
+                }
+                else{
+                    $('#city_id option').remove();
+                    $('#city_id').selectpicker('refresh');
+                }
+            }
+        });
+    }
+});
+
+</script>
 @endsection
